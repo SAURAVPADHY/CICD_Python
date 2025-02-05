@@ -37,18 +37,15 @@ jobs:
     needs: lint
     steps:
     - uses: actions/checkout@v3
-    
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: ${{ env.PYTHON_VERSION }}
-        
     - name: Cache pip packages
       uses: actions/cache@v3
       with:
         path: ~/.cache/pip
         key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
-        
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
@@ -58,11 +55,9 @@ jobs:
         pip install flask==2.3.3
         pip install pytest==7.4.0
         pip install pytest-cov
-        
     - name: Run tests with coverage
       run: |
         pytest tests/ -v --cov=./ --cov-report=xml
-        
     - name: Upload coverage reports
       uses: codecov/codecov-action@v3
 
@@ -71,39 +66,40 @@ jobs:
     needs: test
     if: github.ref == 'refs/heads/main'
     environment: production
-
     steps:
     - uses: actions/checkout@v3
-    
     - name: Log in to Azure
       uses: azure/login@v2
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
-
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: ${{ env.PYTHON_VERSION }}
-        
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        
     - name: Configure startup command
       run: |
-            - name: Configure startup command
-      run: |
         az webapp config set --resource-group ${{ env.RESOURCE_GROUP }} --name ${{ env.AZURE_WEBAPP_NAME }} --linux-fx-version "PYTHON|3.10" --generic-configurations "{\"appCommandLine\": \"gunicorn --bind=0.0.0.0 --timeout 600 app:app\"}"
-
-    
     - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v2
       with:
         app-name: ${{ env.AZURE_WEBAPP_NAME }}
         package: .
-        
     - name: Health check
       run: |
-        sleep 30  # Wait for deployment to stabilize
-        curl --fail https://${{ env.AZURE_WEBAPP_NAME }}.azurewebsites.net/ || exit 1
+        max_retries=10
+        retry_delay=30
+        for ((i=1; i<=$max_retries; i++)); do
+          echo "Attempt $i of $max_retries"
+          if curl --fail --max-time 15 https://${{ env.AZURE_WEBAPP_NAME }}.azurewebsites.net/; then
+            echo "Health check successful"
+            exit 0
+          fi
+          echo "Waiting ${retry_delay} seconds before next attempt..."
+          sleep $retry_delay
+        done
+        echo "Health check failed after $max_retries attempts"
+        exit 1
