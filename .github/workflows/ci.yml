@@ -92,7 +92,10 @@ jobs:
         
     - name: Configure startup command
       run: |
-        az webapp config set --resource-group ${{ env.RESOURCE_GROUP }} --name ${{ env.AZURE_WEBAPP_NAME }} --startup-command "gunicorn --bind=0.0.0.0 --timeout 600 app:app"
+            - name: Configure startup command
+      run: |
+        az webapp config set --resource-group ${{ env.RESOURCE_GROUP }} --name ${{ env.AZURE_WEBAPP_NAME }} --linux-fx-version "PYTHON|3.10" --generic-configurations "{\"appCommandLine\": \"gunicorn --bind=0.0.0.0 --timeout 600 app:app\"}"
+
     
     - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v2
