@@ -90,12 +90,15 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         
-    - name: Deploy to Azure Web App
-      uses: azure/webapps-deploy@v2
-      with:
-        app-name: ${{ env.AZURE_WEBAPP_NAME }}
-        resource-group: ${{ env.RESOURCE_GROUP }}
-        package: .
+    - name: Configure startup command
+        run: |
+          az webapp config set --resource-group ${{ env.RESOURCE_GROUP }} --name ${{ env.AZURE_WEBAPP_NAME }} --startup-command "gunicorn --bind=0.0.0.0 --timeout 600 app:app"
+      
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          package: .
         
     - name: Health check
       run: |
