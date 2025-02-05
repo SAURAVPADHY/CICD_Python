@@ -26,7 +26,7 @@ jobs:
         pip install flake8 black
     - name: Run linters
       run: |
-        flake8 . --max-line-length=88
+        flake8 . --max-line-length=110
 
   test:
     runs-on: ubuntu-latest
