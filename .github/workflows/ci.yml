@@ -5,6 +5,7 @@ on:
     branches: [ main, develop ]
   pull_request:
     branches: [ main, develop ]
+
 permissions:
   id-token: write
   contents: read
@@ -53,8 +54,8 @@ jobs:
         python -m pip install --upgrade pip
         pip install numpy==1.24.3
         pip install pandas==1.5.3
-        pip install folium==0.14.0 
-        pip install flask==2.3.3 
+        pip install folium==0.14.0
+        pip install flask==2.3.3
         pip install pytest==7.4.0
         pip install pytest-cov
         
@@ -76,24 +77,23 @@ jobs:
     
     - name: Log in to Azure
       uses: azure/login@v2
-    #   with:
-    #     creds: '{"clientId":"${{ secrets.AZURE_CLIENT_ID }}","clientSecret":"${{ secrets.AZURE_CLIENT_SECRET }}","subscriptionId":"${{ secrets.AZURE_SUBSCRIPTION_ID }}","tenantId":"${{ secrets.AZURE_TENANT_ID }}"}'
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
+
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: ${{ env.PYTHON_VERSION }}
         
     - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
         
     - name: Configure startup command
-        run: |
-          az webapp config set --resource-group ${{ env.RESOURCE_GROUP }} --name ${{ env.AZURE_WEBAPP_NAME }} --startup-command "gunicorn --bind=0.0.0.0 --timeout 600 app:app"
-      
+      run: |
+        az webapp config set --resource-group ${{ env.RESOURCE_GROUP }} --name ${{ env.AZURE_WEBAPP_NAME }} --startup-command "gunicorn --bind=0.0.0.0 --timeout 600 app:app"
+    
     - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v2
       with:
