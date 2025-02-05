@@ -16,9 +16,10 @@ def find_top_confirmed(n = 15):
 import pandas as pd
 corona_df = pd.read_csv('static/dataset.csv')
 corona_df=corona_df.dropna()
-m=folium.Map(location=[34.223334,-82.461707],
-            tiles='Stamen toner',
-            zoom_start=8)
+m = folium.Map(location=[34.223334, -82.461707],
+               tiles='Stamen Toner',
+               attr='Map tiles by Stamen Design, under CC BY 3.0. Data by OpenStreetMap, under ODbL',
+               zoom_start=8)
 def circle_maker(x):
     folium.Circle(location=[x[0],x[1]],
                  radius=float(x[2])*10,
