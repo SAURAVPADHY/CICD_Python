@@ -5,7 +5,7 @@
 name: Build and deploy Python app to Azure Web App - COVID-19-Spread-Analysis-with-Flask
 
 on:
-  push:
+  workfow_dispatch:
     branches:
       - main
   workflow_dispatch:
