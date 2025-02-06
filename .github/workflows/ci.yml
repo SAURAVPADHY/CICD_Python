@@ -72,22 +72,29 @@ jobs:
       uses: azure/login@v2
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
+    
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: ${{ env.PYTHON_VERSION }}
+    
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-    - name: Configure startup command
+    
+    - name: Configure Python and startup
       run: |
-        az webapp config set --resource-group ${{ env.RESOURCE_GROUP }} --name ${{ env.AZURE_WEBAPP_NAME }} --linux-fx-version "PYTHON|3.10" --generic-configurations "{\"appCommandLine\": \"gunicorn --bind=0.0.0.0 --timeout 600 app:app\"}"
+        az webapp config set --resource-group ${{ env.RESOURCE_GROUP }} --name ${{ env.AZURE_WEBAPP_NAME }} --linux-fx-version "PYTHON|3.10"
+        az webapp config appsettings set --resource-group ${{ env.RESOURCE_GROUP }} --name ${{ env.AZURE_WEBAPP_NAME }} --settings SCM_DO_BUILD_DURING_DEPLOYMENT=true WEBSITE_WEBDEPLOY_USE_SCM=false
+        az webapp config appsettings set --resource-group ${{ env.RESOURCE_GROUP }} --name ${{ env.AZURE_WEBAPP_NAME }} --settings appCommandLine="gunicorn --bind=0.0.0.0 --timeout 600 app:app"
+    
     - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v2
       with:
         app-name: ${{ env.AZURE_WEBAPP_NAME }}
         package: .
+    
     - name: Health check
       run: |
         max_retries=10
