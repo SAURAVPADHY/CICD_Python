@@ -6,10 +6,6 @@ name: Build and deploy Python app to Azure Web App - COVID-19-Spread-Analysis-wi
 
 on:
   workfow_dispatch:
-    branches:
-      - main
-  workflow_dispatch:
-
 jobs:
   build:
     runs-on: ubuntu-latest

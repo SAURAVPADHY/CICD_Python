@@ -2,9 +2,6 @@ name: COVID-19 Flask App CI/CD
 
 on:
   workflow_dispatch:
-    branches: [main, develop]
-  pull_request:
-    branches: [main, develop]
 
 permissions:
   id-token: write
