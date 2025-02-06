@@ -1,7 +1,7 @@
 name: COVID-19 Flask App CI/CD
 
 on:
-  push:
+  workflow_dispatch:
     branches: [ main, develop ]
   pull_request:
     branches: [ main, develop ]
